@@ -37,7 +37,11 @@ router.get('/detail',(req, res, next)=> {
     req.body.author = req.session.username
     const result = newBlog(req.body)
     return result.then(data => {
-      res.json(new SuccessModal(data)) 
+      if(data){
+        res.json(new SuccessModal(data)) 
+      }else{
+        res.json(new ErrorModal('new error'))
+      } 
     })
 });
 
@@ -46,20 +50,22 @@ router.post('/update',loginCheck, (req, res, next)=> {
   req.body.author = req.session.username
   const result = updateBlog(req.query.id,req.body)
   return result.then(data => {
-    res.json(new SuccessModal(data)) 
+    if(data){
+      res.json(new SuccessModal(data)) 
+    }else{
+      res.json(new ErrorModal('update error'))
+    } 
   })
 });
 
 router.post('/delete',loginCheck, (req, res, next)=> {
-  
  req.body.author = req.session.username
-
   const result = deleteBlog(req.query.id,req.body.author)
   return result.then(data => {
     if(data) {
       res.json(new SuccessModal(data)) 
     }else{
-        return res.json(new ErrorModal('delete error'))
+        res.json(new ErrorModal('delete error'))
     }
 })
 });
