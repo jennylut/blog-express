@@ -4,11 +4,13 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session')
+const RedisStore = require('connect-redis')(session)
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
 const blogRouter = require('./routes/blog');
 const userRouter = require('./routes/user');
+
 
 var app = express();
 
@@ -22,13 +24,20 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 // app.use(express.static(path.join(__dirname, 'public')));
 
+const redisClient = require('./db/redis')
+const sessionStore = new RedisStore({
+  client:redisClient
+})
 app.use(session({
+  resave: false, //添加 resave 选项
+  saveUninitialized: true,// 添加 saveUninitialized 选项
   secret:'WJiol_#23123_',
   cookie:{
     path:'/', // 默认配置
     httpOnly:true, // 默认配置
     maxAge:24 * 60 * 60 * 1000
-  }
+  },
+  store:sessionStore
 }))
 
 // app.use('/', indexRouter);
