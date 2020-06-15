@@ -1,10 +1,11 @@
 var createError = require('http-errors');
 var express = require('express');
-var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
+const path = require('path')
+const fs = require('fs')
 
 // var indexRouter = require('./routes/index');
 // var usersRouter = require('./routes/users');
@@ -14,11 +15,23 @@ const userRouter = require('./routes/user');
 
 var app = express();
 
+const ENV = process.env.NODE_ENV
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
-app.use(logger('dev'));
+if(ENV !== 'production'){
+  app.use(logger('dev'))
+} else{
+  // 线上环境
+  const logFileName = path.join(__dirname,'logs','access.log')
+  const writeStream = fs.createWriteStream(logFileName,{
+    flags:'a'
+  })
+  app.use(logger('combined', {
+    stream: writeStream
+  }));
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
